@@ -21,11 +21,10 @@ const server = app.listen(PORT, () => {
 const peerServer = ExpressPeerServer(server, {
   debug: true,
   allow_discovery: true,
-  path: '/'   // ✅ FIX so Lovable won’t double /peerjs/peerjs
+  path: '/peerjs'   // ✅ correct path
 });
+app.use('/', peerServer);
 
-// Mount PeerJS
-app.use('/peerjs', peerServer);
 
 // WebSocket upgrade
 server.on('upgrade', (req, socket, head) => {
