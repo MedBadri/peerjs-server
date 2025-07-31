@@ -1,5 +1,5 @@
 const express = require('express');
-const { ExpressPeerServer } = require('peer');  // ✅ OFFICIAL PEER PACKAGE
+const { ExpressPeerServer } = require('peer');
 const cors = require('cors');
 
 const app = express();
@@ -7,41 +7,21 @@ const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 
-// Health check
-app.get('/', (req, res) => {
-  res.json({ status: '✅ PeerJS Server is running', timestamp: new Date().toISOString() });
-});
-
-// Start HTTP server
+// 🚀 Start HTTP server
 const server = app.listen(PORT, () => {
-  console.log(`✅ PeerJS server running on port ${PORT}`);
+  console.log(`✅ PeerJS Server running on port ${PORT}`);
 });
 
-// Setup PeerJS server
+// ✅ Only mount ONCE — avoids /peerjs/peerjs bug
 const peerServer = ExpressPeerServer(server, {
   debug: true,
-  allow_discovery: true,
-  path: '/peerjs'   // ✅ correct path
-});
-app.use('/', peerServer);
-
-
-// WebSocket upgrade
-server.on('upgrade', (req, socket, head) => {
-  peerServer.handleUpgrade(req, socket, head);
+  path: '/peerjs',   // The endpoint PeerJS will use
+  allow_discovery: true
 });
 
-// Keep-alive tuning
-server.keepAliveTimeout = 120000;
-server.headersTimeout = 125000;
+app.use('/', peerServer); // ✅ Mount at root
 
-console.log('🎯 PeerJS server mounted at /peerjs');
-
-// Debug logs
-peerServer.on('connection', (client) => {
-  console.log(`🔗 Peer connected: ${client.getId()}`);
-});
-
-peerServer.on('disconnect', (client) => {
-  console.log(`❌ Peer disconnected: ${client.getId()}`);
+// Optional healthcheck
+app.get('/', (req, res) => {
+  res.send({ status: 'PeerJS server is live' });
 });
