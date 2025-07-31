@@ -1,6 +1,7 @@
 {
   "name": "peerjs-server",
   "version": "1.0.0",
+  "description": "Stable PeerJS server for voice calls",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
