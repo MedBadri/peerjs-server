@@ -19,8 +19,10 @@ const peerServer = ExpressPeerServer(server, {
   debug: true,
   allow_discovery: true,
   proxied: true,
-  pingInterval: 25000
+  pingInterval: 25000,
+  path: '/'  // ← ADD THIS LINE
 });
+
 
 app.use('/peerjs', peerServer);
 
