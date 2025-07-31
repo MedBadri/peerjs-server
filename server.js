@@ -5,11 +5,20 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors());
+// ✅ Allow CORS
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-// Health check
+// ✅ Health check endpoint
 app.get('/', (req, res) => {
-  res.json({ status: 'PeerJS Server is running!', timestamp: new Date().toISOString(), port: PORT });
+  res.json({ 
+    status: 'PeerJS Server is running!', 
+    timestamp: new Date().toISOString(),
+    port: PORT 
+  });
 });
 
 // ✅ Start server
@@ -17,20 +26,20 @@ const server = app.listen(PORT, () => {
   console.log(`✅ PeerJS server running on port ${PORT}`);
 });
 
-// ✅ Configure PeerJS with fixes
+// ✅ PeerJS server
 const peerServer = ExpressPeerServer(server, {
   debug: true,
   allow_discovery: true,
-  path: '/peerjs',
-  proxied: true,        // ✅ REQUIRED for Railway (handles WSS properly)
-  pingInterval: 25000   // ✅ Keeps WS alive (25s heartbeat)
+  path: '/',         // ✅ IMPORTANT → keeps WS URL clean (…/peerjs)
+  proxied: true,
+  pingInterval: 25000
 });
 
-// ✅ Mount PeerJS
+// ✅ Mount at /peerjs
 app.use('/peerjs', peerServer);
 
-// ✅ Handle WS upgrades
-server.on("upgrade", (req, socket, head) => {
+// ✅ WS upgrade handler
+server.on('upgrade', (req, socket, head) => {
   peerServer.handleUpgrade(req, socket, head);
 });
 
