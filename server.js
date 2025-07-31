@@ -21,7 +21,6 @@ const server = app.listen(PORT, () => {
 const peerServer = ExpressPeerServer(server, {
   debug: true,
   allow_discovery: true,
-  path: '/',
   proxied: true,
   pingInterval: 25000
 });
