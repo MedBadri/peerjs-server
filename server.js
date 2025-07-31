@@ -1,5 +1,5 @@
 const express = require('express');
-const { ExpressPeerServer } = require('peer');
+const { ExpressPeerServer } = require('peerjs-server'); // ✅ UPDATED IMPORT
 const cors = require('cors');
 
 const app = express();
@@ -21,9 +21,9 @@ const server = app.listen(PORT, () => {
 const peerServer = ExpressPeerServer(server, {
   debug: true,
   allow_discovery: true,
-  path: '/',
+  path: '/',          // keep path root, we mount under /peerjs
   proxied: true,
-  pingInterval: 25000
+  pingInterval: 25000 // keep WebSocket alive
 });
 
 // ✅ Mount PeerJS at /peerjs
@@ -34,14 +34,13 @@ server.on('upgrade', (req, socket, head) => {
   peerServer.handleUpgrade(req, socket, head);
 });
 
-// ✅ 🔥 Add keep-alive headers to all responses
+// ✅ Keep-alive tuning for Railway
 server.keepAliveTimeout = 120000; // 2 minutes
-server.headersTimeout = 125000;   // slightly longer than keepAlive
+server.headersTimeout = 125000;   // slightly longer
 
-// ✅ 🔥 Send periodic “heartbeat” so Railway doesn’t kill container
 setInterval(() => {
   console.log('💓 Server heartbeat to keep WS alive');
-}, 20000); // every 20 seconds
+}, 20000); // every 20s
 
 // ✅ Debug logs for PeerJS
 peerServer.on('connection', (client) => {
