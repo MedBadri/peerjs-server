@@ -1,9 +1,9 @@
-const { PeerServer } = require('peer');
 const express = require('express');
+const { ExpressPeerServer } = require('peer');
 const cors = require('cors');
 
 const app = express();
-const port = process.env.PORT || 9000;
+const PORT = process.env.PORT || 8080;
 
 // Enable CORS for all routes
 app.use(cors({
@@ -13,23 +13,32 @@ app.use(cors({
 }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'PeerJS Server is running!', 
+    timestamp: new Date().toISOString(),
+    port: PORT 
+  });
+});
+
+// Create HTTP server
+const server = app.listen(PORT, () => {
+  console.log(`✅ PeerJS server running on port ${PORT}`);
 });
 
 // Create PeerJS server
-const peerServer = PeerServer({
-  port: port,
-  path: '/peer',
-  corsOptions: {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  },
-  // Allow all connections
+const peerServer = ExpressPeerServer(server, {
+  debug: true,
   allow_discovery: true,
-  // Log connections
-  debug: process.env.NODE_ENV !== 'production'
+  path: '/'
+});
+
+// Mount PeerJS server at /peerjs
+app.use('/peerjs', peerServer);
+
+// ✅ FIX for WebSockets on Railway
+server.on("upgrade", (req, socket, head) => {
+  peerServer.handleUpgrade(req, socket, head);
 });
 
 // Log when peers connect/disconnect
@@ -41,6 +50,5 @@ peerServer.on('disconnect', (client) => {
   console.log(`❌ Peer disconnected: ${client.getId()}`);
 });
 
-console.log(`🚀 PeerJS Server running on port ${port}`);
-console.log(`📡 PeerJS path: /peer`);
+console.log('🎯 PeerJS server mounted at /peerjs');
 console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
