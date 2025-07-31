@@ -8,7 +8,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "peer": "github:peers/peerjs-server",
+    "peerjs-server": "github:peers/peerjs-server",
     "express": "^4.18.2",
     "cors": "^2.8.5"
   },

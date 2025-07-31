@@ -1,5 +1,5 @@
 const express = require('express');
-const { ExpressPeerServer } = require('peer');
+const { ExpressPeerServer } = require('peerjs-server');  // ✅ FIXED
 const cors = require('cors');
 
 const app = express();
@@ -21,9 +21,9 @@ const server = app.listen(PORT, () => {
 const peerServer = ExpressPeerServer(server, {
   debug: true,
   allow_discovery: true,
-  path: '/',          
+  path: '/',
   proxied: true,
-  pingInterval: 25000 
+  pingInterval: 25000
 });
 
 // ✅ Mount PeerJS at /peerjs
