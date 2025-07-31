@@ -1,5 +1,5 @@
 const express = require('express');
-const { ExpressPeerServer } = require('peer-server'); // ✅ updated to peer-server
+const { ExpressPeerServer } = require('peer');
 const cors = require('cors');
 
 const app = express();
