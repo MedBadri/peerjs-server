@@ -6,44 +6,36 @@ const app = express();
 const PORT = process.env.PORT || 8080;
 
 // ✅ Allow CORS
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use(cors());
 
 // ✅ Health check endpoint
 app.get('/', (req, res) => {
-  res.json({ 
-    status: 'PeerJS Server is running!', 
-    timestamp: new Date().toISOString(),
-    port: PORT 
-  });
+  res.json({ status: 'PeerJS Server is running', timestamp: new Date().toISOString() });
 });
 
-// ✅ Start server
+// ✅ Start HTTP server
 const server = app.listen(PORT, () => {
   console.log(`✅ PeerJS server running on port ${PORT}`);
 });
 
-// ✅ PeerJS server
+// ✅ IMPORTANT: Set path to "/" so it mounts only once
 const peerServer = ExpressPeerServer(server, {
   debug: true,
   allow_discovery: true,
-  path: '/',         // ✅ IMPORTANT → keeps WS URL clean (…/peerjs)
+  path: '/',         // ✅ not '/peerjs' to avoid double path
   proxied: true,
   pingInterval: 25000
 });
 
-// ✅ Mount at /peerjs
+// ✅ Mount PeerJS server at /peerjs
 app.use('/peerjs', peerServer);
 
-// ✅ WS upgrade handler
+// ✅ Handle WebSocket upgrades
 server.on('upgrade', (req, socket, head) => {
   peerServer.handleUpgrade(req, socket, head);
 });
 
-// ✅ Debug logs
+// ✅ Logs
 peerServer.on('connection', (client) => {
   console.log(`🔗 Peer connected: ${client.getId()}`);
 });
