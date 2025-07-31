@@ -1,5 +1,5 @@
 const express = require('express');
-const { ExpressPeerServer } = require('peerjs-server');
+const { ExpressPeerServer } = require('peer');
 const cors = require('cors');
 
 const app = express();
@@ -20,11 +20,11 @@ const peerServer = ExpressPeerServer(server, {
   allow_discovery: true,
   proxied: true,
   pingInterval: 25000,
-  path: '/'  // ← ADD THIS LINE
+  path: '/peerjs'   // ✅ CHANGE HERE
 });
 
-
 app.use('/peerjs', peerServer);
+
 
 server.on('upgrade', (req, socket, head) => {
   peerServer.handleUpgrade(req, socket, head);
