@@ -1,6 +1,7 @@
 const express = require('express');
 const { ExpressPeerServer } = require('peer');
 const cors = require('cors');
+const http = require('http');
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -22,15 +23,13 @@ app.get('/', (req, res) => {
 });
 
 // Create HTTP server
-const server = app.listen(PORT, () => {
-  console.log(`✅ PeerJS server running on port ${PORT}`);
-});
+const server = http.createServer(app);
 
-// Create PeerJS server with enhanced configuration
+// Create PeerJS server with enhanced configuration for Railway
 const peerServer = ExpressPeerServer(server, {
   debug: true,
   allow_discovery: true,
-  path: '/',
+  path: '/peerjs',
   // Enhanced configuration for better connectivity
   concurrent_limit: 1000,
   proxied: true, // Important for Railway deployment
@@ -60,12 +59,18 @@ const peerServer = ExpressPeerServer(server, {
   }
 });
 
-// Mount PeerJS server at /peerjs
+// Mount PeerJS server
 app.use('/peerjs', peerServer);
 
-// ✅ FIX for WebSockets on Railway
-server.on("upgrade", (req, socket, head) => {
-  peerServer.handleUpgrade(req, socket, head);
+// ✅ CRITICAL FIX for Railway WebSocket handling
+server.on("upgrade", (request, socket, head) => {
+  const pathname = require('url').parse(request.url).pathname;
+  
+  if (pathname === '/peerjs') {
+    peerServer.handleUpgrade(request, socket, head);
+  } else {
+    socket.destroy();
+  }
 });
 
 // Enhanced logging for debugging
@@ -87,6 +92,11 @@ peerServer.on('error', (error) => {
   console.error('❌ PeerJS server error:', error);
 });
 
-console.log('🎯 PeerJS server mounted at /peerjs');
-console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-console.log('🎯 TURN servers configured for NAT traversal');
+// Start server
+server.listen(PORT, () => {
+  console.log(`✅ PeerJS server running on port ${PORT}`);
+  console.log('🎯 PeerJS server mounted at /peerjs');
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('🎯 TURN servers configured for NAT traversal');
+  console.log(`🚀 Server URL: https://peerjs-server-production-c81a.up.railway.app/peerjs`);
+});
