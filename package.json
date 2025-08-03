@@ -1,15 +1,16 @@
 {
   "name": "peerjs-server",
   "version": "1.0.0",
-  "description": "Minimal PeerJS server for WebRTC voice calls",
+  "description": "PeerJS server for voice calls",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
+    "peer": "^1.0.2",
     "express": "^4.18.2",
-    "peer": "^1.0.2"
+    "cors": "^2.8.5"
   },
   "engines": {
     "node": ">=18.0.0"
